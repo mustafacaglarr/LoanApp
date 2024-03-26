@@ -48,14 +48,6 @@ import com.example.loanapp.ui.theme.LoanAppTheme
 @Composable
 fun PersonScreen(debtsViewModel: DebtsViewModel) {
 
-
-    //val debtsState by debtsViewModel.debts.observeAsState()
-    //val debts = debtsState ?: emptyList()
-    //val creditsState by debtsViewModel.credits.observeAsState()
-    //val credits = creditsState ?: emptyList()
-    //val creditsState by debtsViewModel.credits.observeAsState()
-    //val credits = creditsState ?: emptyList()
-    //val debtsAndCredits: List<Any> = (debts + credits).toList()
     val debtsandCreditsState by debtsViewModel.debtsandCredits.observeAsState()
     val debtsandCredits = debtsandCreditsState ?: emptyList()
     Column(modifier = Modifier.fillMaxSize()) {
@@ -92,7 +84,6 @@ fun MyLazyColumn(creditAndDebt: List<CreditAndDebt>) {
         items(creditAndDebt) { creditAndDebt ->
             Box(
                 modifier = Modifier
-                    .clickable { } // Tıklama işlemi için
                     .padding(16.dp)
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
@@ -115,6 +106,7 @@ fun MyLazyColumn(creditAndDebt: List<CreditAndDebt>) {
                     // Kart içeriği
                     Column(
                         modifier = Modifier
+                            .clickable {  }
                             .background(Color.White)
                             .padding(16.dp)
                     ) {
