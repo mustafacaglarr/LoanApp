@@ -7,6 +7,8 @@ import androidx.lifecycle.ViewModel
 class DebtsViewModel : ViewModel() {
     private val repository = DebtsRepository()
     private val _debtsandCredits = MutableLiveData<List<CreditAndDebt>>()
+    private val _names = MutableLiveData<List<String>>()
+    val names: LiveData<List<String>> = _names
     val debtsandCredits: LiveData<List<CreditAndDebt>> get() = _debtsandCredits
 
     init {

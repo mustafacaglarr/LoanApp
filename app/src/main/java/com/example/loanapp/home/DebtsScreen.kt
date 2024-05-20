@@ -43,7 +43,7 @@ import com.example.loanapp.ui.theme.LoanAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController){
+fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController, hideText: Boolean){
     var name by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var debtAmount by remember { mutableStateOf("") }
@@ -125,22 +125,25 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController)
                         unfocusedIndicatorColor = Color.White
                     )
                 )
-                OutlinedTextField(
-                    value = phoneNumber,
-                    onValueChange = { phoneNumber = it},
-                    label = { Text("Telefon Numarası") },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(16.dp),
-                        ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        unfocusedIndicatorColor = Color.White
-                    )
+                if(!hideText){
+                    OutlinedTextField(
+                        value = phoneNumber,
+                        onValueChange = { phoneNumber = it},
+                        label = { Text("Telefon Numarası") },
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier
+                            .shadow(
+                                elevation = 10.dp,
+                                shape = RoundedCornerShape(16.dp),
+                            ),
+                        colors = TextFieldDefaults.textFieldColors(
+                            containerColor = Color.White,
+                            unfocusedIndicatorColor = Color.White
+                        )
 
-                )
+                    )
+                }
+
                 OutlinedTextField(
                     value = if (isDebtSelected) debtAmount else creditAmount,
                     onValueChange = { text ->

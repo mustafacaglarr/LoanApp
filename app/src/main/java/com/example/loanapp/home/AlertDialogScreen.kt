@@ -3,6 +3,7 @@ package com.example.loanapp.home
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,12 +18,14 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavHostController
+import com.example.loanapp.BottomBarScreen
 
 @Composable
 fun CustomAlertDialog(
@@ -50,15 +53,16 @@ fun CustomAlertDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        AlertCard("Kart 1", onItemClick = {
-
-                        }, navController = navController)
-
-                        AlertCard("Kart 2", onItemClick = {
-                            navController.navigate("debts")
+                        AlertCard("Tanımlı Borç / Alacak", onItemClick = {
+                            navController.navigate(BottomBarScreen.Debts.route + "?hideText=true")
                             onDismiss()
-
                         }, navController = navController)
+
+                        AlertCard("Yeni Borç / Alacak", onItemClick = {
+                            navController.navigate(BottomBarScreen.Debts.route + "?hideText=false")
+                            onDismiss()
+                        }, navController = navController)
+
 
                     }
                     Spacer(modifier = Modifier.height(15.dp))
@@ -66,11 +70,11 @@ fun CustomAlertDialog(
                         horizontalArrangement = Arrangement.SpaceBetween,
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        AlertCard("Kart 3", onItemClick = {
+                        AlertCard(text = "Gelir Ekle", onItemClick = {
 
                         }, navController = navController)
 
-                        AlertCard("Kart 4", onItemClick = {
+                        AlertCard("Gider Ekle", onItemClick = {
 
                         }, navController = navController)
                     }
@@ -91,12 +95,14 @@ fun AlertCard(text: String, onItemClick: () -> Unit, navController: NavHostContr
             .clickable { onItemClick() }
             .background(Color.White),
     ) {
-        Text(
-            text = text,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            textAlign = TextAlign.Center
-        )
+        Box(
+            modifier = Modifier.fillMaxSize(), // Box ile içeriği tam kaplamasını sağladık
+            contentAlignment = Alignment.Center // İçeriği merkeze aldık
+        ) {
+            Text(
+                text = text,
+                textAlign = TextAlign.Center
+            )
+        }
     }
 }

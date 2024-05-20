@@ -70,6 +70,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.example.loanapp.home.CustomAlertDialog
 import com.example.loanapp.home.DebtsScreen
 import com.example.loanapp.home.DebtsViewModel
@@ -126,7 +127,9 @@ fun BottomBar(navController: NavHostController){
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
 
-    BottomNavigation {
+    BottomNavigation(
+        backgroundColor = Color.White
+    ) {
         screens.forEach { screen ->
             AddItem(screen = screen, currentDestination = currentDestination, navController = navController)
         }
@@ -186,6 +189,7 @@ fun isSignInOrSignUp(navController: NavController): Boolean {
 fun NavHostt(navController: NavHostController) {
     val signUpViewModel = SignUpViewModel()
     val signInViewModel = SignInViewModel()
+    val debtsViewModel = DebtsViewModel()
     androidx.navigation.compose.NavHost(
         navController = navController,
         startDestination = "signin"
@@ -199,8 +203,12 @@ fun NavHostt(navController: NavHostController) {
         composable(BottomBarScreen.Home.route) {
             HomeScreen()
         }
-        composable(BottomBarScreen.Debts.route) {
-            DebtsScreen( debtsViewModel = DebtsViewModel(),navController)
+        composable(
+            route = BottomBarScreen.Debts.route + "?hideText={hideText}",
+            arguments = listOf(navArgument("hideText") { defaultValue = "false" })
+        ) { backStackEntry ->
+            val hideText = backStackEntry.arguments?.getString("hideText")?.toBoolean() ?: false
+            DebtsScreen(debtsViewModel = debtsViewModel, navController = navController, hideText = hideText)
         }
         composable(BottomBarScreen.Person.route) {
             PersonScreen(debtsViewModel = DebtsViewModel())
