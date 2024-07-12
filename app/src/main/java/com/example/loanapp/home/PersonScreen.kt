@@ -115,19 +115,19 @@ fun MyLazyColumn(creditAndDebt: List<CreditAndDebt>) {
                             style = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.Bold),
                             modifier = Modifier.padding(bottom = 4.dp)
                         )
-                        if (creditAndDebt.debtAmount > creditAndDebt.creditAmount) {
+
                             Text(
                                 text = "Borç Miktarı: ${creditAndDebt.debtAmount}",
                                 style = TextStyle(fontSize = 16.sp),
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
-                        } else {
+
                             Text(
                                 text = "Alacak Miktarı: ${creditAndDebt.creditAmount}",
                                 style = TextStyle(fontSize = 16.sp),
                                 modifier = Modifier.padding(bottom = 8.dp)
                             )
-                        }
+
                     }
                 }
             }

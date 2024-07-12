@@ -26,4 +26,9 @@ class DebtsViewModel : ViewModel() {
 
     }
 
+    fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
+        repository.updateCreditAndDebt(creditId, newDebtAmount, newCreditAmount, newDescription)
+        fetchCreditandDebts() // Fetch the latest data after updating
+    }
+
 }

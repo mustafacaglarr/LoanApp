@@ -54,12 +54,12 @@ fun CustomAlertDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         AlertCard("Tanımlı Borç / Alacak", onItemClick = {
-                            navController.navigate(BottomBarScreen.Debts.route + "?hideText=true")
+                            navController.navigate("defineDebts")
                             onDismiss()
                         }, navController = navController)
 
                         AlertCard("Yeni Borç / Alacak", onItemClick = {
-                            navController.navigate(BottomBarScreen.Debts.route + "?hideText=false")
+                            navController.navigate(BottomBarScreen.Debts.route)
                             onDismiss()
                         }, navController = navController)
 

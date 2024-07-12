@@ -74,6 +74,7 @@ import androidx.navigation.navArgument
 import com.example.loanapp.home.CustomAlertDialog
 import com.example.loanapp.home.DebtsScreen
 import com.example.loanapp.home.DebtsViewModel
+import com.example.loanapp.home.DefineDebtsScreen
 import com.example.loanapp.home.HomeScreen
 import com.example.loanapp.home.PersonScreen
 import com.example.loanapp.signinsignup.SignInScreen
@@ -100,6 +101,7 @@ sealed class BottomBarScreen(
         title = "Person",
         icon = Icons.Default.Person
     )
+
 }
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -122,7 +124,8 @@ fun BottomBar(navController: NavHostController){
     val screens = listOf(
         BottomBarScreen.Home,
         BottomBarScreen.Debts,
-        BottomBarScreen.Person
+        BottomBarScreen.Person,
+
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -204,14 +207,18 @@ fun NavHostt(navController: NavHostController) {
             HomeScreen()
         }
         composable(
-            route = BottomBarScreen.Debts.route + "?hideText={hideText}",
-            arguments = listOf(navArgument("hideText") { defaultValue = "false" })
+            BottomBarScreen.Debts.route
+
         ) { backStackEntry ->
-            val hideText = backStackEntry.arguments?.getString("hideText")?.toBoolean() ?: false
-            DebtsScreen(debtsViewModel = debtsViewModel, navController = navController, hideText = hideText)
+            DebtsScreen(debtsViewModel = debtsViewModel, navController = navController)
         }
         composable(BottomBarScreen.Person.route) {
             PersonScreen(debtsViewModel = DebtsViewModel())
         }
+        composable("defineDebts") {
+            DefineDebtsScreen(debtsViewModel = debtsViewModel,navController = navController)
+        }
+
+
     }
 }

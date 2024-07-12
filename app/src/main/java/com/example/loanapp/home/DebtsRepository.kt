@@ -19,7 +19,7 @@ class DebtsRepository {
         val creditRef = database.reference.child("users").child(uid).child("creditsanddebts")
 
         val creditId = creditRef.push().key ?: return
-        val credit = CreditAndDebt(name, phoneNumber,debtAmount, creditAmount,description)
+        val credit = CreditAndDebt(creditId,name, phoneNumber,debtAmount, creditAmount,description)
         creditRef.child(creditId).setValue(credit)
             .addOnSuccessListener {
                 println("Alacak başarıyla kaydedildi")
@@ -54,5 +54,28 @@ class DebtsRepository {
 
         return creditAndDebtLiveData
     }
+    // Yeni fonksiyon: Borç ve kredi bilgilerini güncelle
+    fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
+        val currentUser = FirebaseAuth.getInstance().currentUser
+        val uid = currentUser?.uid ?: return
+
+        val creditRef = database.reference.child("users").child(uid).child("creditsanddebts").child(creditId)
+
+        val updates = mapOf(
+            "debtAmount" to newDebtAmount,
+            "creditAmount" to newCreditAmount,
+            "description" to newDescription
+        )
+
+        creditRef.updateChildren(updates)
+            .addOnSuccessListener {
+                println("Alacak başarıyla güncellendi")
+            }
+            .addOnFailureListener { e ->
+                println("Alacak güncellenirken bir hata oluştu: $e")
+            }
+    }
+
+
 
 }
