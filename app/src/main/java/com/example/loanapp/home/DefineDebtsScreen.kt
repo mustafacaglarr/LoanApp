@@ -79,7 +79,8 @@ fun DefineDebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostCont
                         .clickable(onClick = { expanded = true })
                         .background(MaterialTheme.colorScheme.surface)
                         .padding(5.dp),
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 18.sp)
+                    style = MaterialTheme.typography.bodyLarge
+
                 )
 
                 DropdownMenu(

@@ -3,32 +3,52 @@ package com.example.loanapp.home
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
+import kotlinx.coroutines.launch
 
 class DebtsViewModel : ViewModel() {
     private val repository = DebtsRepository()
     private val _debtsandCredits = MutableLiveData<List<CreditAndDebt>>()
-    private val _names = MutableLiveData<List<String>>()
-    val names: LiveData<List<String>> = _names
+
     val debtsandCredits: LiveData<List<CreditAndDebt>> get() = _debtsandCredits
 
-    init {
-        fetchCreditandDebts()
-    }
-    private fun fetchCreditandDebts() {
-        val creditsLiveData = repository.getDebtsandCredits()
-        creditsLiveData.observeForever { DebtsandCreditsList ->
-            _debtsandCredits.value = DebtsandCreditsList
+    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val authStateListener = FirebaseAuth.AuthStateListener { auth ->
+        val user = auth.currentUser
+        if (user != null) {
+            fetchCreditandDebts(user)
+        } else {
+            _debtsandCredits.value = emptyList() // User is not logged in, clear the data
         }
     }
 
-    fun saveCreditandDebt(name: String, phoneNumber: String,debtAmount: Double, creditAmount: Double, description: String) {
-        repository.saveCreditandDebt(name, phoneNumber,debtAmount, creditAmount, description)
+    init {
+        auth.addAuthStateListener(authStateListener)
+    }
 
+    private fun fetchCreditandDebts(user: FirebaseUser) {
+        val creditsLiveData = repository.getDebtsandCredits(user.uid)
+        creditsLiveData.observeForever { debtsAndCreditsList ->
+            _debtsandCredits.value = debtsAndCreditsList
+        }
+    }
+
+    fun saveCreditandDebt(name: String, phoneNumber: String, debtAmount: Double, creditAmount: Double, description: String) {
+        repository.saveCreditandDebt(name, phoneNumber, debtAmount, creditAmount, description)
     }
 
     fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
         repository.updateCreditAndDebt(creditId, newDebtAmount, newCreditAmount, newDescription)
-        fetchCreditandDebts() // Fetch the latest data after updating
+        auth.currentUser?.let { fetchCreditandDebts(it) } // Fetch the latest data after updating
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        auth.removeAuthStateListener(authStateListener)
+    }
+
+
 
 }

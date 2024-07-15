@@ -1,5 +1,6 @@
 package com.example.loanapp.home
 
+import android.content.ContentValues.TAG
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -28,7 +29,7 @@ class DebtsRepository {
                 println("Alacak kaydedilirken bir hata oluştu: $e")
             }
     }
-    fun getDebtsandCredits(): LiveData<List<CreditAndDebt>> {
+    fun getDebtsandCredits(uid: String): LiveData<List<CreditAndDebt>>  {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid ?: return MutableLiveData<List<CreditAndDebt>>().apply { value = emptyList() }
 
@@ -37,18 +38,17 @@ class DebtsRepository {
 
         debtsRef.addListenerForSingleValueEvent(object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                println("veri geldi")
                 val creditAndDebtlist = mutableListOf<CreditAndDebt>()
                 dataSnapshot.children.forEach { snapshot ->
                     val creditAndDebt = snapshot.getValue(CreditAndDebt::class.java)
                     creditAndDebt?.let { creditAndDebtlist.add(it) }
                 }
-                creditAndDebtLiveData.value = creditAndDebtlist // Update LiveData with the fetched debts
+                creditAndDebtLiveData.value = creditAndDebtlist
             }
 
             override fun onCancelled(databaseError: DatabaseError) {
                 // Handle cancellation if needed
-                println("onCancelled hata")
+                Log.e(TAG, "getDebtsandCredits:onCancelled", databaseError.toException())
             }
         })
 

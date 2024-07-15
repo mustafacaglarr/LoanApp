@@ -66,6 +66,7 @@ fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostControll
         Button(
             onClick = {
                 signInViewModel.signInUser(email, password,navController)
+
             },
             modifier = Modifier
                 .fillMaxWidth()

@@ -11,29 +11,25 @@ import com.google.firebase.auth.FirebaseAuth
 class SignInViewModel : ViewModel() {
     private val _signInResult = MutableLiveData<Boolean>()
     val signInResult : LiveData<Boolean> = _signInResult
+
+    private val _currentUserEmail = MutableLiveData<String?>()
+    val currentUserEmail: LiveData<String?> = _currentUserEmail
+
     fun signInUser(email:String,password:String, navController: NavController){
         FirebaseAuth.getInstance().signInWithEmailAndPassword(email,password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful){
                     _signInResult.value=true
+                    _currentUserEmail.value = email // Kullanıcı oturum açtığında email'i güncelle
+
                     navController.navigate("home")
 
-                    println("başarılı")
+                    Log.d(TAG, "SignInViewModel: Kullanıcı oturum açtı. Email: $email")
                 }else{
                     _signInResult.value = false
                     Log.e(TAG, "Giriş başarısız", task.exception)
                 }
-
             }
     }
 
-    //fun fetchUserId(callback: (String?) -> Unit) {
-    //    signInResult.observeForever { signInSuccess ->
-    //        if (signInSuccess) {
-    //            val user = FirebaseAuth.getInstance().currentUser
-    //            val uid = user?.uid
-    //            callback(uid)
-    //        }
-    //    }
-    //}
 }

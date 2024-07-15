@@ -71,11 +71,13 @@ fun CustomAlertDialog(
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         AlertCard(text = "Gelir Ekle", onItemClick = {
-
+                            navController.navigate("income")
+                            onDismiss()
                         }, navController = navController)
 
                         AlertCard("Gider Ekle", onItemClick = {
-
+                            navController.navigate("expense")
+                            onDismiss()
                         }, navController = navController)
                     }
                 }
