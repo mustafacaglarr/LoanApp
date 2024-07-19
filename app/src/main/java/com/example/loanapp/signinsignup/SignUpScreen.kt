@@ -39,7 +39,7 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel,navController: NavHostControll
     var surname by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+    var phoneNum by remember { mutableStateOf("") }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -78,8 +78,8 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel,navController: NavHostControll
 
         )
         OutlinedTextField(
-            value = phoneNumber,
-            onValueChange = { phoneNumber = it },
+            value = phoneNum,
+            onValueChange = { phoneNum = it },
             label = { Text("Phone Number") },
             modifier = Modifier
                 .fillMaxWidth()
@@ -95,7 +95,7 @@ fun SignUpScreen(signUpViewModel: SignUpViewModel,navController: NavHostControll
         )
         Button(
             onClick = {
-                signUpViewModel.registerUser(email, password)
+                signUpViewModel.registerUser(email, password,phoneNum)
                 navController.navigate("signin")
 
             },

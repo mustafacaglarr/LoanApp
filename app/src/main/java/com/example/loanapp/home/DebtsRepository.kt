@@ -76,6 +76,31 @@ class DebtsRepository {
             }
     }
 
+    fun getPinByPhoneNumber(phoneNumber: String, callback: (String?) -> Unit) {
+        val usersRef = database.reference.child("users")
+
+        // Telefon numarası ile sorgu yap
+        usersRef.orderByChild("phoneNum").equalTo(phoneNumber).addListenerForSingleValueEvent(
+            object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (userSnapshot in snapshot.children) {
+                            val pin = userSnapshot.child("pin").getValue(String::class.java)
+                            callback(pin)
+                            return
+                        }
+                    } else {
+                        callback(null) // Kullanıcı bulunamadı
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("DebtsRepository", "Error retrieving user data", error.toException())
+                    callback(null)
+                }
+            }
+        )
+    }
 
 
 }

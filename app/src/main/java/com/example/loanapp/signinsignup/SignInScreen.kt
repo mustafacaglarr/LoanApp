@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +31,7 @@ import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.example.loanapp.ui.theme.LoanAppTheme
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostController) {
     var email by remember { mutableStateOf("") }
@@ -66,6 +68,7 @@ fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostControll
         Button(
             onClick = {
                 signInViewModel.signInUser(email, password,navController)
+                signInViewModel.updatePinOnLogin()
 
             },
             modifier = Modifier

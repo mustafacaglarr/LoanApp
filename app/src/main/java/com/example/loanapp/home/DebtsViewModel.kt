@@ -37,11 +37,16 @@ class DebtsViewModel : ViewModel() {
 
     fun saveCreditandDebt(name: String, phoneNumber: String, debtAmount: Double, creditAmount: Double, description: String) {
         repository.saveCreditandDebt(name, phoneNumber, debtAmount, creditAmount, description)
+
     }
 
     fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
         repository.updateCreditAndDebt(creditId, newDebtAmount, newCreditAmount, newDescription)
         auth.currentUser?.let { fetchCreditandDebts(it) } // Fetch the latest data after updating
+    }
+
+    fun getPinByPhoneNumber(phoneNumber: String, callback: (String?) -> Unit) {
+        repository.getPinByPhoneNumber(phoneNumber, callback)
     }
 
     override fun onCleared() {

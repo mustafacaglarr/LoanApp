@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -54,13 +55,15 @@ import com.example.loanapp.ui.theme.LoanAppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController){
+fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var phoneNumber by remember { mutableStateOf("") }
     var debtAmount by remember { mutableStateOf("") }
     var creditAmount by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var isDebtSelected by remember { mutableStateOf(false) }
+    var showDialog by remember { mutableStateOf(false) }
+    var pin1 by remember { mutableStateOf("") }
     val debtsandCreditsState by debtsViewModel.debtsandCredits.observeAsState()
     val debtsandCredits = debtsandCreditsState ?: emptyList()
 
@@ -71,82 +74,148 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController)
         contentAlignment = Alignment.Center
     ) {
 
-            Column(
+        Column(
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Borç Bilgileri",
+                style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
+            )
+
+            Row(
                 modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
-
-
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.Center,
             ) {
-                Text(
-                    text = "Borç Bilgileri",
-                    style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.Bold)
-                )
-
-                Row(
+                Button(
+                    onClick = { isDebtSelected = true },
+                    shape = RoundedCornerShape(0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (isDebtSelected) Color.Red else Color.White,
+                    ),
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.Center,
-
+                        .weight(1f)
+                        .absolutePadding(right = 2.dp)
+                        .shadow(elevation = 10.dp)
                 ) {
-                    Button(
-                        onClick = { isDebtSelected = true},
-                        shape = RoundedCornerShape(0.dp),// Borç seçildiğinde
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (isDebtSelected) Color.Red else Color.White,
-
-
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .absolutePadding(right = 2.dp)
-                            .shadow(elevation = 10.dp)
-                    ) {
-                        Text(
-                            text = "Borç",
-                            style = TextStyle(color = Color.Black
-                            )
-                        )
-                    }
-
-                    Button(
-                        onClick = { isDebtSelected = false },// Alacak seçildiğinde
-                        shape = RoundedCornerShape(0.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (!isDebtSelected) Color.Green else Color.White
-                        ),
-                        modifier = Modifier
-                            .weight(1f)
-                            .shadow(elevation = 10.dp)
-                    ) {
-                        Text(
-                            text = "Alacak",
-                            style = TextStyle(color = Color.Black)
-                            )
-                    }
-                }
-                OutlinedTextField(
-                    value = name,
-                    onValueChange = { name = it },
-                    label = { Text("İsim") },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(16.dp),
-                        ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        unfocusedIndicatorColor = Color.White
+                    Text(
+                        text = "Borç",
+                        style = TextStyle(color = Color.Black)
                     )
+                }
+
+                Button(
+                    onClick = { isDebtSelected = false },
+                    shape = RoundedCornerShape(0.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = if (!isDebtSelected) Color.Green else Color.White
+                    ),
+                    modifier = Modifier
+                        .weight(1f)
+                        .shadow(elevation = 10.dp)
+                ) {
+                    Text(
+                        text = "Alacak",
+                        style = TextStyle(color = Color.Black)
+                    )
+                }
+            }
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it },
+                label = { Text("İsim") },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = RoundedCornerShape(16.dp),
+                    ),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    unfocusedIndicatorColor = Color.White
                 )
+            )
+            OutlinedTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = { Text("Telefon Numarası") },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = RoundedCornerShape(16.dp),
+                    ),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    unfocusedIndicatorColor = Color.White
+                )
+            )
+
+            OutlinedTextField(
+                value = if (isDebtSelected) debtAmount else creditAmount,
+                onValueChange = { text ->
+                    if (isDebtSelected) {
+                        debtAmount = text
+                    } else {
+                        creditAmount = text
+                    }
+                },
+                label = { Text(if (isDebtSelected) "Borç Miktarı" else "Alacak Miktarı") },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = RoundedCornerShape(16.dp),
+                    ),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    unfocusedIndicatorColor = Color.White
+                )
+            )
+            TextField(
+                value = description,
+                onValueChange = { description = it },
+                label = { Text("Açıklama") },
+                shape = RoundedCornerShape(16.dp),
+                modifier = Modifier
+                    .shadow(
+                        elevation = 10.dp,
+                        shape = RoundedCornerShape(16.dp),
+                    ),
+                colors = TextFieldDefaults.textFieldColors(
+                    containerColor = Color.White,
+                    unfocusedIndicatorColor = Color.White
+                )
+            )
+
+            Button(
+                onClick = { showDialog = true },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+            ) {
+                Text("Tamamla")
+            }
+        }
+    }
+
+    if (showDialog) {
+        AlertDialog(
+            onDismissRequest = { showDialog = false },
+            title = { Text("PIN Girişi") },
+            text = {
+                Column {
+                    Text("Lütfen PIN girin")
                     OutlinedTextField(
-                        value = phoneNumber,
-                        onValueChange = { phoneNumber = it},
-                        label = { Text("Telefon Numarası") },
+                        value = pin1,
+                        onValueChange = { pin1 = it },
+                        label = { Text("PIN") },
                         shape = RoundedCornerShape(16.dp),
                         modifier = Modifier
                             .shadow(
@@ -157,81 +226,67 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel,navController: NavHostController)
                             containerColor = Color.White,
                             unfocusedIndicatorColor = Color.White
                         )
-
                     )
-
-                OutlinedTextField(
-                    value = if (isDebtSelected) debtAmount else creditAmount,
-                    onValueChange = { text ->
-                        if (isDebtSelected) {
-                            debtAmount = text
-                        } else {
-                            creditAmount = text
-                        }
-                    },
-                    label = { Text(if (isDebtSelected) "Borç Miktarı" else "Alacak Miktarı")},
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(16.dp),
-                        ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        unfocusedIndicatorColor = Color.White
-                    )
-                    )
-                TextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    label = { Text("Açıklama") },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier
-                        .shadow(
-                            elevation = 10.dp,
-                            shape = RoundedCornerShape(16.dp),
-                        ),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.White,
-                        unfocusedIndicatorColor = Color.White
-                    )
-                )
-
+                }
+            },
+            confirmButton = {
                 Button(
                     onClick = {
-                        if(isDebtSelected==true){
-                            creditAmount = "0.0"
-
-                            debtsViewModel.saveCreditandDebt(name, phoneNumber, debtAmount.toDouble(), creditAmount.toDouble(), description)
-
-                            navController.navigate("home")
-
+                        showDialog = true
+                        debtsViewModel.getPinByPhoneNumber(phoneNumber) { pin ->
+                            pin?.let {
+                                println(pin)
+                                if (pin == pin1) {
+                                    showDialog = false
+                                    if (isDebtSelected) {
+                                        creditAmount = "0.0"
+                                        debtsViewModel.saveCreditandDebt(
+                                            name,
+                                            phoneNumber,
+                                            debtAmount.toDouble(),
+                                            creditAmount.toDouble(),
+                                            description
+                                        )
+                                        navController.navigate("home")
+                                    } else {
+                                        debtAmount = "0.0"
+                                        debtsViewModel.saveCreditandDebt(
+                                            name,
+                                            phoneNumber,
+                                            debtAmount.toDouble(),
+                                            creditAmount.toDouble(),
+                                            description
+                                        )
+                                        navController.navigate("home")
+                                    }
+                                } else {
+                                    // Handle incorrect PIN case
+                                }
+                            } ?: run {
+                                // Handle case where PIN is null (user not found)
+                            }
                         }
-                        else{
-                            debtAmount = "0.0"
-                            debtsViewModel.saveCreditandDebt(name, phoneNumber, debtAmount.toDouble(), creditAmount.toDouble(), description)
-                            navController.navigate("home")
-                        }
-
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
-
                 ) {
-                    Text("Tamamla")
+                    Text("Onayla")
                 }
-        }
+            },
+            dismissButton = {
+                Button(
+                    onClick = { showDialog = false },
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                ) {
+                    Text("İptal")
+                }
+            }
+        )
     }
 }
-
-
 
 @Preview(showBackground = true)
 @Composable
 fun DebtsScreenPreview() {
-
     LoanAppTheme {
 
     }
