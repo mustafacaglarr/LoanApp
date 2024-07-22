@@ -17,17 +17,34 @@ class DebtsRepository {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid ?: return
 
-        val creditRef = database.reference.child("users").child(uid).child("creditsanddebts")
-
-        val creditId = creditRef.push().key ?: return
-        val credit = CreditAndDebt(creditId,name, phoneNumber,debtAmount, creditAmount,description)
-        creditRef.child(creditId).setValue(credit)
+        // Mevcut kullanıcının creditsanddebts düğümüne veri ekleme
+        val currentUserCreditRef = database.reference.child("users").child(uid).child("creditsanddebts")
+        val creditId = currentUserCreditRef.push().key ?: return
+        val credit = CreditAndDebt(creditId, name, phoneNumber, debtAmount, creditAmount, description)
+        currentUserCreditRef.child(creditId).setValue(credit)
             .addOnSuccessListener {
-                println("Alacak başarıyla kaydedildi")
+                println("Mevcut kullanıcının alacak başarıyla kaydedildi")
             }
             .addOnFailureListener { e ->
-                println("Alacak kaydedilirken bir hata oluştu: $e")
+                println("Mevcut kullanıcının alacak kaydedilirken bir hata oluştu: $e")
             }
+
+        // Telefon numarasına sahip kullanıcının UID'sini al ve onun creditsanddebts düğümüne veri ekle
+        getUserUidByPhoneNumber(phoneNumber) { otherUserUid ->
+            otherUserUid?.let { otherUid ->
+                val otherUserCreditRef = database.reference.child("users").child(otherUid).child("creditsanddebts")
+                val otherUserCredit = CreditAndDebt(creditId, name, phoneNumber, debtAmount, creditAmount, description)
+                otherUserCreditRef.child(creditId).setValue(otherUserCredit)
+                    .addOnSuccessListener {
+                        println("Diğer kullanıcının alacak başarıyla kaydedildi")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Diğer kullanıcının alacak kaydedilirken bir hata oluştu: $e")
+                    }
+            } ?: run {
+                println("Telefon numarasına sahip kullanıcı bulunamadı")
+            }
+        }
     }
     fun getDebtsandCredits(uid: String): LiveData<List<CreditAndDebt>>  {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -55,25 +72,41 @@ class DebtsRepository {
         return creditAndDebtLiveData
     }
     // Yeni fonksiyon: Borç ve kredi bilgilerini güncelle
-    fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
+    fun updateCreditAndDebt(creditId: String, phoneNumber: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid ?: return
 
-        val creditRef = database.reference.child("users").child(uid).child("creditsanddebts").child(creditId)
-
+        // Mevcut kullanıcının creditsanddebts düğümünde güncelleme
+        val currentUserCreditRef = database.reference.child("users").child(uid).child("creditsanddebts").child(creditId)
         val updates = mapOf(
             "debtAmount" to newDebtAmount,
             "creditAmount" to newCreditAmount,
             "description" to newDescription
         )
 
-        creditRef.updateChildren(updates)
+        currentUserCreditRef.updateChildren(updates)
             .addOnSuccessListener {
-                println("Alacak başarıyla güncellendi")
+                println("Mevcut kullanıcının alacak başarıyla güncellendi")
             }
             .addOnFailureListener { e ->
-                println("Alacak güncellenirken bir hata oluştu: $e")
+                println("Mevcut kullanıcının alacak güncellenirken bir hata oluştu: $e")
             }
+
+        // Telefon numarasına sahip kullanıcının UID'sini al ve onun creditsanddebts düğümünde güncelleme yap
+        getUserUidByPhoneNumber(phoneNumber) { otherUserUid ->
+            otherUserUid?.let { otherUid ->
+                val otherUserCreditRef = database.reference.child("users").child(otherUid).child("creditsanddebts").child(creditId)
+                otherUserCreditRef.updateChildren(updates)
+                    .addOnSuccessListener {
+                        println("Diğer kullanıcının alacak başarıyla güncellendi")
+                    }
+                    .addOnFailureListener { e ->
+                        println("Diğer kullanıcının alacak güncellenirken bir hata oluştu: $e")
+                    }
+            } ?: run {
+                println("Telefon numarasına sahip kullanıcı bulunamadı")
+            }
+        }
     }
 
     fun getPinByPhoneNumber(phoneNumber: String, callback: (String?) -> Unit) {
@@ -96,6 +129,31 @@ class DebtsRepository {
 
                 override fun onCancelled(error: DatabaseError) {
                     Log.e("DebtsRepository", "Error retrieving user data", error.toException())
+                    callback(null)
+                }
+            }
+        )
+    }
+
+    private fun getUserUidByPhoneNumber(phoneNumber: String, callback: (String?) -> Unit) {
+        val usersRef = database.reference.child("users")
+
+        usersRef.orderByChild("phoneNum").equalTo(phoneNumber).addListenerForSingleValueEvent(
+            object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        for (userSnapshot in snapshot.children) {
+                            val uid = userSnapshot.key
+                            callback(uid)
+                            return
+                        }
+                    } else {
+                        callback(null) // Kullanıcı bulunamadı
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("DebtsRepository", "Error retrieving user UID", error.toException())
                     callback(null)
                 }
             }

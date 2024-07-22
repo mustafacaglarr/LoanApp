@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +39,9 @@ import com.example.loanapp.signinsignup.SignInScreen
 import com.example.loanapp.signinsignup.SignInViewModel
 import com.example.loanapp.signinsignup.SignUpScreen
 import com.example.loanapp.signinsignup.SignUpViewModel
+import com.example.loanapp.signinsignup.SplashScreen
+import com.example.loanapp.signinsignup.SplashScreenViewModel
+
 sealed class BottomBarScreen(
     val route:String,
     val title:String,
@@ -45,30 +49,32 @@ sealed class BottomBarScreen(
 ){
     object Home:BottomBarScreen(
         route = "home",
-        title = "Home",
+        title = "Ana Sayfa",
         icon = Icons.Default.Home
     )
     object Debts:BottomBarScreen(
         route = "debts",
-        title = "Debts",
+        title = "Ekle - Sil",
         icon = Icons.Default.Add
     )
     object Person:BottomBarScreen(
         route = "person",
-        title = "Person",
+        title = "Kişiler",
         icon = Icons.Default.Person
     )
 
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Navbar(){
+fun Navbar() {
     val navController: NavHostController = rememberNavController()
+
     Scaffold(
         bottomBar = {
-            if (!isSignInOrSignUp(navController)){
+            // SplashScreen veya diğer bottom bar göstermemek istenen ekranlarda bottom bar'ı göstermeyin
+            if (!shouldHideBottomBar(navController)) {
                 BottomBar(navController = navController)
             }
         }
@@ -141,48 +147,47 @@ fun RowScope.AddItem(
 
 
 @Composable
-fun isSignInOrSignUp(navController: NavController): Boolean {
+fun shouldHideBottomBar(navController: NavController): Boolean {
     val currentRoute = navController.currentBackStackEntryAsState().value?.destination?.route
-    return currentRoute == "signin" || currentRoute == "signup"
+    return currentRoute == "splash" || currentRoute == "signin" || currentRoute == "signup"
 }
-
 @Composable
 fun NavHostt(navController: NavHostController) {
+    val splashScreenViewModel = SplashScreenViewModel()
     val signUpViewModel = SignUpViewModel()
     val signInViewModel = SignInViewModel()
     val debtsViewModel = DebtsViewModel()
+
     androidx.navigation.compose.NavHost(
         navController = navController,
-        startDestination = "signin"
+        startDestination = "splash"
     ) {
-        composable("signup"){
-            SignUpScreen(signUpViewModel =signUpViewModel , navController = navController)
+        composable("splash") {
+            SplashScreen(viewModel = splashScreenViewModel, navController = navController)
         }
-        composable("signin"){
-            SignInScreen(signInViewModel =signInViewModel , navController = navController)
+        composable("signup") {
+            SignUpScreen(signUpViewModel = signUpViewModel, navController = navController)
+        }
+        composable("signin") {
+            SignInScreen(signInViewModel = signInViewModel, navController = navController)
         }
         composable(BottomBarScreen.Home.route) {
             HomeScreen()
         }
-        composable(
-            BottomBarScreen.Debts.route
-
-        ) { backStackEntry ->
+        composable(BottomBarScreen.Debts.route) {
             DebtsScreen(debtsViewModel = debtsViewModel, navController = navController)
         }
         composable(BottomBarScreen.Person.route) {
             PersonScreen(debtsViewModel = DebtsViewModel())
         }
         composable("defineDebts") {
-            DefineDebtsScreen(debtsViewModel = debtsViewModel,navController = navController)
+            DefineDebtsScreen(debtsViewModel = debtsViewModel, navController = navController)
         }
-        composable("income"){
+        composable("income") {
             IncomeScreen(navController = navController)
         }
-        composable("expense"){
+        composable("expense") {
             ExpenseScreen(navController = navController)
         }
-
-
     }
 }

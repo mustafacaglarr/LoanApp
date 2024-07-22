@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -50,6 +51,8 @@ fun DefineDebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostCont
     var description by remember { mutableStateOf("") }
     var creditId by remember { mutableStateOf("") }
     var isDebtSelected by remember { mutableStateOf(false) }
+    var pin1 by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
 
     val debtsAndCreditsState by debtsViewModel.debtsandCredits.observeAsState()
     val debtsAndCredits = debtsAndCreditsState ?: emptyList()
@@ -201,17 +204,120 @@ fun DefineDebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostCont
             Button(
                 onClick = {
                     selectedOption?.let { item ->
-                        debtsViewModel.updateCreditAndDebt(
-                            creditId = item.creditId,
-                            newDebtAmount = debtAmount.toDoubleOrNull() ?: 0.0,
-                            newCreditAmount = creditAmount.toDoubleOrNull() ?: 0.0,
-                            newDescription = description
-                        )
+                        debtsViewModel.getPinByPhoneNumber(item.phoneNumber) { pin ->
+                            pin?.let {
+                                showDialog = true // PIN bulundu, dialog göster
+                            } ?: run {
+                                // PIN bulunamadı, doğrudan kaydet
+                                if (isDebtSelected) {
+
+                                    debtsViewModel.updateCreditAndDebt(
+                                        creditId = item.creditId,
+                                        phoneNumber=item.phoneNumber,
+                                        newDebtAmount = debtAmount.toDoubleOrNull() ?: 0.0,
+                                        newCreditAmount = creditAmount.toDoubleOrNull() ?: 0.0,
+                                        newDescription = description
+                                    )
+                                    navController.navigate("home")
+                                } else {
+
+                                    debtsViewModel.updateCreditAndDebt(
+                                        creditId = item.creditId,
+                                        phoneNumber=item.phoneNumber,
+                                        newDebtAmount = debtAmount.toDoubleOrNull() ?: 0.0,
+                                        newCreditAmount = creditAmount.toDoubleOrNull() ?: 0.0,
+                                        newDescription = description
+                                    )
+                                    navController.navigate("home")
+                                }
+                            }
+                        }
+
+
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(text = "Güncelle")
+            }
+
+            if (showDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDialog = false },
+                    title = { Text("PIN Girişi") },
+                    text = {
+                        Column {
+                            Text("Lütfen PIN girin")
+                            OutlinedTextField(
+                                value = pin1,
+                                onValueChange = { pin1 = it },
+                                label = { Text("PIN") },
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier
+                                    .shadow(
+                                        elevation = 10.dp,
+                                        shape = RoundedCornerShape(16.dp),
+                                    ),
+                                colors = TextFieldDefaults.textFieldColors(
+                                    containerColor = Color.White,
+                                    unfocusedIndicatorColor = Color.White
+                                )
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                selectedOption?.let { item ->
+                                debtsViewModel.getPinByPhoneNumber(item.phoneNumber) { pin ->
+                                    pin?.let {
+                                        if (pin == pin1) {
+                                            showDialog = false
+                                            if (isDebtSelected) {
+
+                                                debtsViewModel.updateCreditAndDebt(
+                                                    creditId = item.creditId,
+                                                    phoneNumber=item.phoneNumber,
+                                                    newDebtAmount = debtAmount.toDoubleOrNull() ?: 0.0,
+                                                    newCreditAmount = creditAmount.toDoubleOrNull() ?: 0.0,
+                                                    newDescription = description
+                                                )
+
+                                                navController.navigate("home")
+                                            } else {
+
+                                                debtsViewModel.updateCreditAndDebt(
+                                                    creditId = item.creditId,
+                                                    phoneNumber=item.phoneNumber,
+                                                    newDebtAmount = debtAmount.toDoubleOrNull() ?: 0.0,
+                                                    newCreditAmount = creditAmount.toDoubleOrNull() ?: 0.0,
+                                                    newDescription = description
+                                                )
+                                                navController.navigate("home")
+                                            }
+                                        } else {
+                                            // Handle incorrect PIN case
+                                        }
+                                    } ?: run {
+                                        // Handle case where PIN is null (user not found)
+                                    }
+                                }
+                            }
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
+                        ) {
+                            Text("Onayla")
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = { showDialog = false },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color.Gray)
+                        ) {
+                            Text("İptal")
+                        }
+                    }
+                )
             }
         }
     }

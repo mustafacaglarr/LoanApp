@@ -132,6 +132,7 @@ fun IncomeScreen(navController: NavHostController, viewModel: FinanceViewModel =
 
                     // Kaydetme işlemini burada çağırıyoruz
                     viewModel.saveFinance(category, amountValue, desc, "income")
+                    navController.navigate("home")
                 },
                 modifier = Modifier
                     .fillMaxWidth()

@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
+import com.google.firebase.database.FirebaseDatabase
 import kotlinx.coroutines.launch
 
 class DebtsViewModel : ViewModel() {
@@ -40,8 +41,8 @@ class DebtsViewModel : ViewModel() {
 
     }
 
-    fun updateCreditAndDebt(creditId: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
-        repository.updateCreditAndDebt(creditId, newDebtAmount, newCreditAmount, newDescription)
+    fun updateCreditAndDebt(creditId: String,phoneNumber: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
+        repository.updateCreditAndDebt(creditId,phoneNumber ,newDebtAmount, newCreditAmount, newDescription)
         auth.currentUser?.let { fetchCreditandDebts(it) } // Fetch the latest data after updating
     }
 

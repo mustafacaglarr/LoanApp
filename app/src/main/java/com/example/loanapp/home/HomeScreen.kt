@@ -89,10 +89,10 @@ fun FinanceItem(financeCategory: FinanceCategory) {
                     .weight(1f)
                     .padding(start = 16.dp)
             ) {
-                Text(text = "Category: ${financeCategory.category}")
-                Text(text = "Amount: ${financeCategory.amount} $")
-                Text(text = "Description: ${financeCategory.description}")
-                Text(text = "Type: ${if (financeCategory.type == "income") "Income" else "Expense"}")
+                Text(text = "Kategori: ${financeCategory.category}")
+                Text(text = "Miktar: ${financeCategory.amount} TL")
+                Text(text = "Açıklama: ${financeCategory.description}")
+                Text(text = "Tip: ${if (financeCategory.type == "income") "Gelir" else "Gider"}")
             }
         }
     }
@@ -117,7 +117,7 @@ fun CardScreen(totalIncome: Double, totalExpense: Double) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Total Income: ${totalIncome.toInt()-totalExpense.toInt()} $",
+                text = "Toplam Gelir: ${totalIncome.toInt()-totalExpense.toInt()} TL",
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Medium
             )
@@ -130,13 +130,13 @@ fun CardScreen(totalIncome: Double, totalExpense: Double) {
         ) {
             Column {
                 Text(
-                    text = "Income",
+                    text = "Gelir",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(start = 22.dp),
                 )
                 Text(
-                    text = "${totalIncome.toInt()} $",
+                    text = "${totalIncome.toInt()} TL",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(start = 20.dp),
@@ -144,13 +144,13 @@ fun CardScreen(totalIncome: Double, totalExpense: Double) {
             }
             Column {
                 Text(
-                    text = "Expense",
+                    text = "Gider",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium,
                     modifier = Modifier.padding(end = 30.dp),
                 )
                 Text(
-                    text = "${totalExpense.toInt()} $",
+                    text = "${totalExpense.toInt()} TL",
                     fontSize = 25.sp,
                     fontWeight = FontWeight.Medium
                 )

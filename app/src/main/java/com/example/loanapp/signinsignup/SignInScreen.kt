@@ -16,12 +16,14 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,9 +36,10 @@ import com.example.loanapp.ui.theme.LoanAppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostController) {
+    val context = LocalContext.current
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
-    var phoneNumber by remember { mutableStateOf("") }
+    val signInError by signInViewModel.signInError.observeAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,7 +53,7 @@ fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostControll
         OutlinedTextField(
             value = email,
             onValueChange = { email = it },
-            label = { Text("Email") },
+            label = { Text("E-posta") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
@@ -60,15 +63,15 @@ fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostControll
         OutlinedTextField(
             value = password,
             onValueChange = { password = it },
-            label = { Text("Password") },
+            label = { Text("Şifre") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(8.dp)
         )
         Button(
             onClick = {
-                signInViewModel.signInUser(email, password,navController)
-                signInViewModel.updatePinOnLogin()
+                signInViewModel.signInUser(email, password,navController,context)
+
 
             },
             modifier = Modifier
@@ -77,17 +80,25 @@ fun SignInScreen(signInViewModel: SignInViewModel,navController: NavHostControll
             colors = ButtonDefaults.buttonColors(containerColor = Color.Black)
 
         ) {
-            Text("Login")
+            Text("Giriş yap")
         }
         Spacer(modifier = Modifier.height(13.dp))
+        signInError?.let {
+            Text(
+                text = it,
+                color = Color.Red,
+                style = TextStyle(fontSize = 16.sp),
+                modifier = Modifier.padding(8.dp)
+            )
+        }
         Row {
             Text(
-                text = "Don't have an account? ",
+                text = "Hesabın yok mu? ",
                 style = TextStyle(color = Color.Gray, fontSize = 18.sp)
 
             )
             Text(
-                text = "Sign up",
+                text = "Kaydol",
                 style = TextStyle(fontWeight = FontWeight.Bold, fontSize = 18.sp),
                 modifier = Modifier.clickable {
                     navController.navigate("signup")
@@ -107,14 +118,14 @@ fun SignInFooter() {
 
     ) {
         Text(
-            text = "Hello there,",
+            text = "Merhaba,",
             color = Color.Black,
             fontSize = 35.sp,
             fontWeight = FontWeight.Bold
 
         )
         Text(
-            text = "Login to your account",
+            text = "Hesabınıza giriş yapın",
             color = Color.Gray,
             )
     }

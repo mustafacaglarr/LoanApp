@@ -194,7 +194,36 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
             )
 
             Button(
-                onClick = { showDialog = true },
+                onClick = {
+                    debtsViewModel.getPinByPhoneNumber(phoneNumber) { pin ->
+                        pin?.let {
+                            showDialog = true // PIN bulundu, dialog göster
+                        } ?: run {
+                            // PIN bulunamadı, doğrudan kaydet
+                            if (isDebtSelected) {
+                                creditAmount = "0.0"
+                                debtsViewModel.saveCreditandDebt(
+                                    name,
+                                    phoneNumber,
+                                    debtAmount.toDouble(),
+                                    creditAmount.toDouble(),
+                                    description
+                                )
+                                navController.navigate("home")
+                            } else {
+                                debtAmount = "0.0"
+                                debtsViewModel.saveCreditandDebt(
+                                    name,
+                                    phoneNumber,
+                                    debtAmount.toDouble(),
+                                    creditAmount.toDouble(),
+                                    description
+                                )
+                                navController.navigate("home")
+                            }
+                        }
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(8.dp),
@@ -232,10 +261,8 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
             confirmButton = {
                 Button(
                     onClick = {
-                        showDialog = true
                         debtsViewModel.getPinByPhoneNumber(phoneNumber) { pin ->
                             pin?.let {
-                                println(pin)
                                 if (pin == pin1) {
                                     showDialog = false
                                     if (isDebtSelected) {
@@ -247,6 +274,7 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
                                             creditAmount.toDouble(),
                                             description
                                         )
+
                                         navController.navigate("home")
                                     } else {
                                         debtAmount = "0.0"
