@@ -1,30 +1,21 @@
 package com.example.loanapp.home
 
-import android.widget.ToggleButton
+
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.absolutePadding
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldColors
@@ -40,18 +31,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import com.example.loanapp.ui.theme.LoanAppTheme
+import com.example.loanapp.NotificationService
+import com.google.firebase.ktx.Firebase
+import com.google.firebase.messaging.ktx.messaging
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,13 +56,15 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
     val debtsandCreditsState by debtsViewModel.debtsandCredits.observeAsState()
     val debtsandCredits = debtsandCreditsState ?: emptyList()
 
+    // Alınan Context
+    val context = LocalContext.current
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
-
         Column(
             modifier = Modifier
                 .padding(16.dp)
@@ -142,9 +133,11 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
             )
             OutlinedTextField(
                 value = phoneNumber,
-                onValueChange = { phoneNumber = it },
+                onValueChange = { if (it.length <= 11) phoneNumber = it },
                 label = { Text("Telefon Numarası") },
+                placeholder = { Text("0") },
                 shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .shadow(
                         elevation = 10.dp,
@@ -167,6 +160,7 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
                 },
                 label = { Text(if (isDebtSelected) "Borç Miktarı" else "Alacak Miktarı") },
                 shape = RoundedCornerShape(16.dp),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier
                     .shadow(
                         elevation = 10.dp,
@@ -240,7 +234,7 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
             title = { Text("PIN Girişi") },
             text = {
                 Column {
-                    Text("Lütfen PIN girin")
+                    Text(if (isDebtSelected) "Lütfen Borç Eklenecek Kişinin Pin Numarasını Giriniz" else "Lütfen Alacak Eklenecek Kişinin Pin Numarasını Giriniz")
                     OutlinedTextField(
                         value = pin1,
                         onValueChange = { pin1 = it },
@@ -261,9 +255,15 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
             confirmButton = {
                 Button(
                     onClick = {
+                        Firebase.messaging.subscribeToTopic("Tutorial")
                         debtsViewModel.getPinByPhoneNumber(phoneNumber) { pin ->
                             pin?.let {
                                 if (pin == pin1) {
+                                    val notificationService = NotificationService(context)
+                                    notificationService.showNotification(
+                                        title = "Borç-Alacak Ekleme Başarılı ",
+                                        message = "$name isimli kullanıcıya ekleme işlemi tamamlandı."
+                                    )
                                     showDialog = false
                                     if (isDebtSelected) {
                                         creditAmount = "0.0"
@@ -288,6 +288,11 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
                                         navController.navigate("home")
                                     }
                                 } else {
+                                    val notificationService = NotificationService(context)
+                                    notificationService.showNotification(
+                                        title = "Borç-Alacak Ekle Başarısız ",
+                                        message = "$name isimli kullanıcıya ekleme işlemi tamamlanmadı!!"
+                                    )
                                     // Handle incorrect PIN case
                                 }
                             } ?: run {
@@ -309,13 +314,5 @@ fun DebtsScreen(debtsViewModel: DebtsViewModel, navController: NavHostController
                 }
             }
         )
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun DebtsScreenPreview() {
-    LoanAppTheme {
-
     }
 }

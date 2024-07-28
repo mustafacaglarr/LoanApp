@@ -11,4 +11,3 @@ data class FinanceCategory(
 ){
     constructor() : this("","",0.0 ,"", 0,"", 0)
 }
-

@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">LoanApp</string>
-    <string name="profile">LoanApp</string>
-    <string name="friends_list">LoanApp</string>
+    <string name="app_name">MoneyVia</string>
+    <string name="profile">MoneyVia</string>
+    <string name="friends_list">MoneyVia</string>
+    <string name="default_notification_channel_id">default_channel</string>
 </resources>

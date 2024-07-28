@@ -178,7 +178,7 @@ fun NavHostt(navController: NavHostController) {
             DebtsScreen(debtsViewModel = debtsViewModel, navController = navController)
         }
         composable(BottomBarScreen.Person.route) {
-            PersonScreen(debtsViewModel = DebtsViewModel())
+            PersonScreen(debtsViewModel = DebtsViewModel(), navController = navController)
         }
         composable("defineDebts") {
             DefineDebtsScreen(debtsViewModel = debtsViewModel, navController = navController)

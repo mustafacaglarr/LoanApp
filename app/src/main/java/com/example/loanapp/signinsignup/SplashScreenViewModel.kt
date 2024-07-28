@@ -39,6 +39,7 @@ class SplashScreenViewModel : ViewModel() {
 
                     // Giriş başarılıysa
                     _navigateTo.postValue("home") // veya uygun bir rota
+                    updatePinOnLogin()
                 } catch (e: Exception) {
                     // Giriş başarısızsa
                     Log.w("SplashScreenViewModel", "User login failed", e)

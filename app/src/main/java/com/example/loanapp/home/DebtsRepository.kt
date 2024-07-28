@@ -2,18 +2,27 @@ package com.example.loanapp.home
 
 import android.content.ContentValues.TAG
 import android.util.Log
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.loanapp.NotificationService
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.ktx.database
 import com.google.firebase.ktx.Firebase
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import okhttp3.*
+import java.io.IOException
 
-class DebtsRepository {
+class DebtsRepository() {
     private val database = Firebase.database
-    fun saveCreditandDebt(name: String, phoneNumber: String,debtAmount: Double, creditAmount: Double, description: String) {
+
+    fun saveCreditandDebt(name: String, phoneNumber: String, debtAmount: Double, creditAmount: Double, description: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
         val uid = currentUser?.uid ?: return
 
@@ -34,9 +43,11 @@ class DebtsRepository {
             otherUserUid?.let { otherUid ->
                 val otherUserCreditRef = database.reference.child("users").child(otherUid).child("creditsanddebts")
                 val otherUserCredit = CreditAndDebt(creditId, name, phoneNumber, debtAmount, creditAmount, description)
+                
                 otherUserCreditRef.child(creditId).setValue(otherUserCredit)
                     .addOnSuccessListener {
                         println("Diğer kullanıcının alacak başarıyla kaydedildi")
+
                     }
                     .addOnFailureListener { e ->
                         println("Diğer kullanıcının alacak kaydedilirken bir hata oluştu: $e")
@@ -71,6 +82,32 @@ class DebtsRepository {
 
         return creditAndDebtLiveData
     }
+    fun getPin(uid: String, callback: (String?) -> Unit) {
+        val usersRef = database.reference.child("users").child(uid)
+
+        usersRef.addListenerForSingleValueEvent(
+            object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    if (snapshot.exists()) {
+                        val pinCurrentUser = snapshot.child("pin").getValue(String::class.java)
+                        Log.d("DebtsRepository", "Pin bulundu: $pinCurrentUser") // Log ekledik
+                        callback(pinCurrentUser)
+                    } else {
+                        Log.d("DebtsRepository", "Kullanıcı bulunamadı") // Log ekledik
+                        callback(null) // Kullanıcı bulunamadı
+                    }
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    Log.e("DebtsRepository", "Error retrieving user data", error.toException())
+                    callback(null)
+                }
+            }
+        )
+    }
+
+
+
     // Yeni fonksiyon: Borç ve kredi bilgilerini güncelle
     fun updateCreditAndDebt(creditId: String, phoneNumber: String, newDebtAmount: Double, newCreditAmount: Double, newDescription: String) {
         val currentUser = FirebaseAuth.getInstance().currentUser
@@ -159,6 +196,7 @@ class DebtsRepository {
             }
         )
     }
+
 
 
 }

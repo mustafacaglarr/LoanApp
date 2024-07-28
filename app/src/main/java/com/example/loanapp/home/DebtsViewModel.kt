@@ -25,6 +25,7 @@ class DebtsViewModel : ViewModel() {
         }
     }
 
+
     init {
         auth.addAuthStateListener(authStateListener)
     }
@@ -48,6 +49,9 @@ class DebtsViewModel : ViewModel() {
 
     fun getPinByPhoneNumber(phoneNumber: String, callback: (String?) -> Unit) {
         repository.getPinByPhoneNumber(phoneNumber, callback)
+    }
+    fun getPin(uid: String, callback: (String?) -> Unit) {
+        repository.getPin(uid, callback)
     }
 
     override fun onCleared() {

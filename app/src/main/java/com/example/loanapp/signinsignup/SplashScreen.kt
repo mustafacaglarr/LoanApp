@@ -27,9 +27,9 @@ fun SplashScreen(viewModel: SplashScreenViewModel, navController: NavHostControl
 
     // Giriş yapma kontrolünü başlat
     LaunchedEffect(Unit) {
-        delay(5000)
+        delay(3000)
         viewModel.checkUserAuthentication(context)
-        viewModel.updatePinOnLogin()
+
     }
 
     LaunchedEffect(navigateTo) {

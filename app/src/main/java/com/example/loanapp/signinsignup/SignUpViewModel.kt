@@ -5,6 +5,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlin.random.Random
 
 class SignUpViewModel: ViewModel() {
@@ -15,15 +16,14 @@ class SignUpViewModel: ViewModel() {
     // Hata mesajları ve başarı durumları için LiveData
     val registrationStatus = MutableLiveData<String>()
     val isRegistrationSuccessful = MutableLiveData<Boolean>()
+
     fun registerUser(email: String, password: String, phoneNum: String, context: Context) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     val pin = generateRandomPin()
-                    saveUserDataToDatabase(email, pin, phoneNum)
+                    saveUserDataToDatabase(email, pin, phoneNum, context)
                     saveUserToSharedPreferences(email, password, context)
-                    registrationStatus.value = "Kayıt başarılı!"
-                    isRegistrationSuccessful.value = true
                 } else {
                     Log.w("SignUpViewModel", "User registration failed", task.exception)
                     registrationStatus.value = "Bu e-posta adresine ait kullanıcı zaten var!"
@@ -32,20 +32,49 @@ class SignUpViewModel: ViewModel() {
             }
     }
 
-
-    private fun saveUserDataToDatabase(email: String, pin: String,phoneNum:String) {
+    private fun saveUserDataToDatabase(email: String, pin: String, phoneNum: String, context: Context) {
         val userId = firebaseAuth.currentUser?.uid ?: return
         val usersRef = firebaseDatabase.reference.child("users")
 
-        val user = User(userId, email, pin,phoneNum) // Kullanıcı modeline PIN ekledik
+        val user = User(userId, email, pin, phoneNum)
 
         usersRef.child(userId).setValue(user)
             .addOnSuccessListener {
                 Log.d("SignUpViewModel", "User data saved to database successfully")
+                saveFcmTokenToDatabase(userId)
             }
             .addOnFailureListener { e ->
                 Log.w("SignUpViewModel", "Error saving user data to database", e)
+                registrationStatus.value = "Kullanıcı verileri kaydedilirken hata oluştu!"
+                isRegistrationSuccessful.value = false
             }
+    }
+
+    private fun saveFcmTokenToDatabase(userId: String) {
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("SignUpViewModel", "Fetching FCM registration token failed", task.exception)
+                registrationStatus.value = "FCM token alınamadı!"
+                isRegistrationSuccessful.value = false
+                return@addOnCompleteListener
+            }
+
+            // Get new FCM registration token
+            val token = task.result
+            val userTokenRef = firebaseDatabase.reference.child("users").child(userId).child("fcmToken")
+
+            userTokenRef.setValue(token)
+                .addOnSuccessListener {
+                    Log.d("SignUpViewModel", "FCM token saved to database successfully")
+                    registrationStatus.value = "Kayıt başarılı!"
+                    isRegistrationSuccessful.value = true
+                }
+                .addOnFailureListener { e ->
+                    Log.w("SignUpViewModel", "Error saving FCM token to database", e)
+                    registrationStatus.value = "FCM token kaydedilirken hata oluştu!"
+                    isRegistrationSuccessful.value = false
+                }
+        }
     }
 
     private fun generateRandomPin(): String {
@@ -60,7 +89,4 @@ class SignUpViewModel: ViewModel() {
         editor.putString("password", password)
         editor.apply()
     }
-
-
 }
-
