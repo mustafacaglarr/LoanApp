@@ -5,15 +5,15 @@ plugins {
 }
 
 android {
-    namespace = "com.example.loanapp"
+    namespace = "com.caglar.loanapp"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.loanapp"
+        applicationId = "com.caglar.loanapp"
         minSdk = 24
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 5
+        versionName = "2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {

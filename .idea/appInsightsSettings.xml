@@ -8,7 +8,7 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.example.loanapp" />
+                  <option name="appId" value="com.caglar.loanapp" />
                   <option name="mobileSdkAppId" value="1:724817233343:android:95c1513ebb448987914d0a" />
                   <option name="projectId" value="loanapp-4a4e5" />
                   <option name="projectNumber" value="724817233343" />
